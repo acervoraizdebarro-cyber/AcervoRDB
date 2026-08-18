@@ -243,7 +243,25 @@
     border: 1.5px solid var(--ink); border-radius: var(--radius); background: #fff;
     letter-spacing: 0.03em;
   }
-  .scan-hint{ font-size: 12px; color: var(--ink-soft); margin-top: 6px; }
+    .scan-hint{ font-size: 12px; color: var(--ink-soft); margin-top: 6px; }
+
+  .name-search-box{
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px; margin-bottom: 20px;
+  }
+  .name-search-box input{
+    font-family:'Inter', sans-serif; font-size: 15px; padding: 11px 14px; width:100%;
+    border: 1.5px solid var(--line); border-radius: var(--radius); background: #fff;
+  }
+  .search-results{ margin-top: 10px; display:flex; flex-direction:column; gap:6px; max-height: 320px; overflow-y:auto; }
+  .search-result-item{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:#fff; border:1px solid var(--line); border-radius: var(--radius);
+    padding: 10px 14px; cursor:pointer; transition: border-color .15s ease;
+  }
+  .search-result-item:hover{ border-color: var(--ink); }
+  .search-result-item .sr-title{ font-family:'Baloo 2', sans-serif; font-weight:600; font-size:14.5px; }
+  .search-result-item .sr-meta{ font-size:12px; color: var(--ink-soft); margin-top:2px; }
 
   /* ---------- Catalog card ---------- */
   .catalog-card{
@@ -459,9 +477,14 @@
       <h2 class="section-title">Registrar préstamo</h2>
       <p class="section-sub">Escanea el código de barras o el ISBN del libro, o escríbelo y presiona Enter.</p>
 
-      <div class="scan-box">
+            <div class="scan-box">
         <input id="scan-input" autocomplete="off" placeholder="Código de barras o ISBN…" />
         <div class="scan-hint">El lector de código de barras funciona como un teclado: coloca el cursor aquí y escanea directamente.</div>
+      </div>
+
+      <div class="name-search-box">
+        <input id="name-search-input" autocomplete="off" placeholder="Buscar por título o rótulo…" />
+        <div id="name-search-results" class="search-results"></div>
       </div>
 
       <div id="scan-result"></div>
@@ -689,7 +712,7 @@
       if(btn.dataset.tab === "prestamos") renderPrestamos();
       if(btn.dataset.tab === "vencidos") renderVencidos();
       if(btn.dataset.tab === "perdidos") renderPerdidos();
-      if(btn.dataset.tab === "prestar"){ $("#scan-input").value=""; $("#scan-result").innerHTML=""; $("#scan-input").focus(); }
+            if(btn.dataset.tab === "prestar"){ $("#scan-input").value=""; $("#scan-result").innerHTML=""; $("#name-search-input").value=""; $("#name-search-results").innerHTML=""; $("#scan-input").focus(); }
     });
   });
 
@@ -1171,7 +1194,7 @@
     return books.find(b => (b.codigoBarras && b.codigoBarras === code) || (b.isbn && b.isbn === code));
   }
 
-  function handleScan(){
+    function handleScan(){
     const code = scanInput.value.trim();
     if(!code) return;
     const book = findBookByCode(code);
@@ -1189,18 +1212,59 @@
       });
       return;
     }
+    selectBookForLoan(book);
+  }
 
+  function selectBookForLoan(book){
+    const result = $("#scan-result");
     if(book.estado === "perdido"){
       result.innerHTML = `<div class="notice warn">Este libro está marcado como <strong>${escapeHtml(book.perdidoMotivo||"perdido/dañado")}</strong>. Repórtalo desde la pestaña "Perdidos" si fue recuperado.</div>`;
       return;
     }
-
     if(book.estado === "disponible"){
       renderLoanForm(book);
     }else{
       renderReturnCard(book);
     }
   }
+
+  // ---------- Búsqueda por título o rótulo ----------
+  const nameSearchInput = $("#name-search-input");
+  nameSearchInput.addEventListener("input", ()=>{
+    const q = nameSearchInput.value.trim().toLowerCase();
+    const resultsBox = $("#name-search-results");
+    if(!q){ resultsBox.innerHTML = ""; return; }
+    const matches = books.filter(b =>
+      (b.titulo||"").toLowerCase().includes(q) ||
+      (b.rotulo||"").toLowerCase().includes(q) ||
+      (b.autor||"").toLowerCase().includes(q)
+    ).slice(0, 20);
+    if(matches.length === 0){
+      resultsBox.innerHTML = `<div class="notice info">No hay libros que coincidan con "${escapeHtml(nameSearchInput.value.trim())}".</div>`;
+      return;
+    }
+    resultsBox.innerHTML = matches.map(b => {
+      const estadoTxt = b.estado === "disponible" ? "Disponible" : (b.estado === "perdido" ? "Perdido/dañado" : "Prestado");
+      const badgeClass = b.estado === "disponible" ? "disp" : (b.estado === "perdido" ? "perdido" : "prest");
+      return `
+      <div class="search-result-item" data-id="${escapeHtml(b.id)}">
+        <div>
+          <div class="sr-title">${escapeHtml(b.titulo||"Sin título")}</div>
+          <div class="sr-meta">${escapeHtml(b.autor||"Autor desconocido")}${b.rotulo ? " · Rótulo "+escapeHtml(b.rotulo) : ""}</div>
+        </div>
+        <span class="badge ${badgeClass}">${estadoTxt}</span>
+      </div>`;
+    }).join("");
+    $$(".search-result-item", resultsBox).forEach(item=>{
+      item.addEventListener("click", ()=>{
+        const book = books.find(b => String(b.id) === item.dataset.id);
+        if(!book) return;
+        nameSearchInput.value = "";
+        resultsBox.innerHTML = "";
+        selectBookForLoan(book);
+      });
+    });
+  });
 
   function renderLoanForm(book){
     const dueDefault = addDays(todayISO(), 15);
