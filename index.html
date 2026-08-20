@@ -30,6 +30,8 @@
     --ocre: #e4c261;
     --carmin: #8b4545;
     --rojovioleta: #ab477b;
+    --rojo-alerta: #c0392b;
+    --morado-alerta: #8e44ad;
     --azulvioleta: #7a4b98;
     --azul: #4a69ac;
     --verdeazul: #447f8d;
@@ -195,17 +197,17 @@
 
   tbody tr.row-disp{ background: rgba(70,139,105,0.14); box-shadow: inset 4px 0 0 0 var(--verde); }
   tbody tr.row-prest{ background: rgba(228,194,97,0.32); box-shadow: inset 4px 0 0 0 var(--ocre); }
-  tbody tr.row-venc{ background: rgba(139,69,69,0.16); box-shadow: inset 4px 0 0 0 var(--carmin); }
-  tbody tr.row-perdido{ background: rgba(171,71,123,0.16); box-shadow: inset 4px 0 0 0 var(--rojovioleta); }
+  tbody tr.row-venc{ background: rgba(192,57,43,0.16); box-shadow: inset 4px 0 0 0 var(--rojo-alerta); }
+  tbody tr.row-perdido{ background: rgba(142,68,173,0.16); box-shadow: inset 4px 0 0 0 var(--morado-alerta); }
 
   .badge{
     display:inline-block; font-family:'IBM Plex Mono', monospace; font-size: 11px; padding: 3px 8px;
-    border-radius: 999px; font-weight: 700; letter-spacing:.02em; color: var(--ink);
+    border-radius: 999px; font-weight: 700; letter-spacing:.02em;
   }
-  .badge.disp{ background: rgba(70,139,105,0.22); }
-  .badge.prest{ background: rgba(228,194,97,0.45); }
-  .badge.venc{ background: rgba(139,69,69,0.22); }
-  .badge.perdido{ background: rgba(171,71,123,0.22); }
+  .badge.disp{ background: rgba(70,139,105,0.22); color: var(--verde); }
+  .badge.prest{ background: rgba(228,194,97,0.55); color: #7a5c14; }
+  .badge.venc{ background: var(--rojo-alerta); color: #fff; }
+  .badge.perdido{ background: var(--morado-alerta); color: #fff; }
   .badge.copy-badge{ background: var(--panel-2); color: var(--ink-soft); font-weight:600; }
 
   .link-action{ background:none; border:none; cursor:pointer; font-size: 12.5px; font-family:'Inter',sans-serif; color: var(--teal); font-weight:600; padding: 2px 4px; white-space:nowrap; }
