@@ -234,24 +234,14 @@
   .row-skip{ opacity: 0.5; text-decoration: line-through; }
 
   /* ---------- Loan scan ---------- */
-  .scan-box{
-    background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius);
-    padding: 18px; margin-bottom: 20px;
-  }
-  .scan-box input{
-    font-family:'IBM Plex Mono', monospace; font-size: 18px; padding: 13px 14px; width:100%;
-    border: 1.5px solid var(--ink); border-radius: var(--radius); background: #fff;
-    letter-spacing: 0.03em;
-  }
-    .scan-hint{ font-size: 12px; color: var(--ink-soft); margin-top: 6px; }
-
   .name-search-box{
     background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius);
     padding: 18px; margin-bottom: 20px;
   }
   .name-search-box input{
-    font-family:'Inter', sans-serif; font-size: 15px; padding: 11px 14px; width:100%;
-    border: 1.5px solid var(--line); border-radius: var(--radius); background: #fff;
+    font-family:'IBM Plex Mono', monospace; font-size: 18px; padding: 13px 14px; width:100%;
+    border: 1.5px solid var(--ink); border-radius: var(--radius); background: #fff;
+    letter-spacing: 0.03em;
   }
   .search-results{ margin-top: 10px; display:flex; flex-direction:column; gap:6px; max-height: 320px; overflow-y:auto; }
   .search-result-item{
@@ -475,12 +465,7 @@
     <!-- PRESTAR -->
     <section class="view" id="view-prestar">
       <h2 class="section-title">Registrar préstamo</h2>
-      <p class="section-sub">Escanea el código de barras o el ISBN del libro, o escríbelo y presiona Enter.</p>
-
-            <div class="scan-box">
-        <input id="scan-input" autocomplete="off" placeholder="Código de barras o ISBN…" />
-        <div class="scan-hint">El lector de código de barras funciona como un teclado: coloca el cursor aquí y escanea directamente.</div>
-      </div>
+      <p class="section-sub">Busca el libro por título o rótulo.</p>
 
       <div class="name-search-box">
         <input id="name-search-input" autocomplete="off" placeholder="Buscar por título o rótulo…" />
@@ -712,7 +697,7 @@
       if(btn.dataset.tab === "prestamos") renderPrestamos();
       if(btn.dataset.tab === "vencidos") renderVencidos();
       if(btn.dataset.tab === "perdidos") renderPerdidos();
-            if(btn.dataset.tab === "prestar"){ $("#scan-input").value=""; $("#scan-result").innerHTML=""; $("#name-search-input").value=""; $("#name-search-results").innerHTML=""; $("#scan-input").focus(); }
+      if(btn.dataset.tab === "prestar"){ $("#scan-result").innerHTML=""; $("#name-search-input").value=""; $("#name-search-results").innerHTML=""; $("#name-search-input").focus(); }
     });
   });
 
@@ -1184,36 +1169,6 @@
     });
   }
 
-  // ---------- Loan: scan flow ----------
-  const scanInput = $("#scan-input");
-  scanInput.addEventListener("keydown", (e)=>{
-    if(e.key === "Enter"){ e.preventDefault(); handleScan(); }
-  });
-
-  function findBookByCode(code){
-    return books.find(b => (b.codigoBarras && b.codigoBarras === code) || (b.isbn && b.isbn === code));
-  }
-
-    function handleScan(){
-    const code = scanInput.value.trim();
-    if(!code) return;
-    const book = findBookByCode(code);
-    const result = $("#scan-result");
-
-    if(!book){
-      result.innerHTML = `
-        <div class="notice warn">No se encontró ningún libro con el código <strong class="mono">${escapeHtml(code)}</strong> en el catálogo.</div>
-        <button class="btn btn-ghost" id="quick-add">Agregar este código al catálogo</button>
-      `;
-      $("#quick-add").addEventListener("click", ()=>{
-        goToTab("catalogo");
-        openBookForm(null);
-        if(/^\d{8,14}$/.test(code)){ $("#f-isbn").value = code; } else { $("#f-codigo").value = code; }
-      });
-      return;
-    }
-    selectBookForLoan(book);
-  }
 
   function selectBookForLoan(book){
     const result = $("#scan-result");
@@ -1330,8 +1285,8 @@
     book.estado = "prestado";
     saveBooks(); saveLoans();
     toast(`Préstamo registrado a nombre de ${nombre}.`);
-    scanInput.value = ""; $("#scan-result").innerHTML = "";
-    scanInput.focus();
+    $("#name-search-input").value = ""; $("#name-search-results").innerHTML = ""; $("#scan-result").innerHTML = "";
+    $("#name-search-input").focus();
     refreshStats();
   }
 
