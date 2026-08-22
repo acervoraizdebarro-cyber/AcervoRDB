@@ -910,7 +910,7 @@
             <input id="f-rotulo" value="${book?escapeHtml(book.rotulo):""}" placeholder="863.44 GAR" />
           </div>
           <div class="field">
-            <label for="f-clas">Clasificación / categoría</label>
+            <label for="f-clas">Clasificación / Género</label>
             <input id="f-clas" value="${book?escapeHtml(book.clasificacion):""}" placeholder="Novela, Infantil, Referencia…" />
           </div>
         </div>
@@ -937,11 +937,7 @@
               <input id="f-idioma" value="${book?escapeHtml(book.idioma):""}" placeholder="Español" />
             </div>
           </div>
-          <div class="field grow">
-            <label for="f-resumen">Resumen</label>
-            <textarea id="f-resumen" rows="3" placeholder="Breve resumen del libro…">${book?escapeHtml(book.resumen):""}</textarea>
-          </div>
-        </div>
+                  </div>
 
         <div class="row" style="margin-top:4px;">
           <button class="btn btn-primary" id="f-save">${book ? "Guardar cambios" : "Agregar al catálogo"}</button>
@@ -980,9 +976,9 @@
     const isbn = $("#f-isbn").value.trim();
     const rotulo = $("#f-rotulo").value.trim();
     const clasificacion = $("#f-clas").value.trim();
+    const genero = clasificacion;
     const editorial = $("#f-editorial") ? $("#f-editorial").value.trim() : "";
     const idioma = $("#f-idioma") ? $("#f-idioma").value.trim() : "";
-    const resumen = $("#f-resumen") ? $("#f-resumen").value.trim() : "";
     const autoresAdicionales = $$(".extra-author-input").map(i=>i.value.trim()).filter(v=>v);
 
     if(!titulo || !autor){ toast("Título y autor son obligatorios."); return; }
@@ -998,8 +994,8 @@
         const dup2 = books.find(b => b.codigoBarras === codigoBarras && b.id !== editingBookId);
         if(dup2){ toast(`Ese código de barras ya pertenece a "${dup2.titulo}".`); return; }
       }
-      const b = books.find(x=>x.id===editingBookId);
-      Object.assign(b, {titulo, autor, isbn, codigoBarras, rotulo, clasificacion, editorial, idioma, resumen, autoresAdicionales});
+        const b = books.find(x=>x.id===editingBookId);
+      Object.assign(b, {titulo, autor, isbn, codigoBarras, rotulo, clasificacion, genero, editorial, idioma, autoresAdicionales});
       toast("Cambios guardados.");
     }else{
       let ejemplares = parseInt(($("#f-ejemplares")||{}).value, 10);
@@ -1007,9 +1003,9 @@
       if(ejemplares > 100){ toast("Máximo 100 ejemplares a la vez."); return; }
       const grupoId = uid();
       for(let i = 1; i <= ejemplares; i++){
-        books.push({
+            books.push({
           id: uid(), titulo, autor, isbn, codigoBarras: generarCodigoBarras(),
-          rotulo, clasificacion, editorial, idioma, resumen, autoresAdicionales,
+          rotulo, clasificacion, genero, editorial, idioma, autoresAdicionales,
           estado: "disponible", fechaIngreso: todayISO(),
           grupoId, copiaNumero: i, copiaTotal: ejemplares
         });
