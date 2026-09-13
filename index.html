@@ -1093,7 +1093,7 @@
       else if(isbn && existingIsbns.has(isbn)){ status = "skip"; reason = "ISBN ya existe en el catálogo"; }
       else if(isbn && seenInFile.has(isbn)){ status = "skip"; reason = "ISBN repetido en el archivo"; }
       if(status === "ok" && isbn) seenInFile.add(isbn);
-      return {titulo, autor, isbn, codigoBarras, rotulo, clasificacion, editorial, idioma, resumen, ejemplares, status, reason};
+      return {titulo, autor, isbn, codigoBarras, rotulo, clasificacion, genero: clasificacion, editorial, idioma, resumen, ejemplares, status, reason};
     });
 
     const okCount = parsed.filter(p=>p.status==="ok").length;
@@ -1150,7 +1150,7 @@
           books.push({
             id: uid(), titulo: p.titulo, autor: p.autor, isbn: p.isbn,
             codigoBarras: (i === 1 && p.codigoBarras) ? p.codigoBarras : generarCodigoBarras(),
-            rotulo: p.rotulo, clasificacion: p.clasificacion,
+            rotulo: p.rotulo, clasificacion: p.clasificacion, genero: p.genero,
             editorial: p.editorial, idioma: p.idioma, resumen: p.resumen,
             autoresAdicionales: [],
             estado: "disponible", fechaIngreso: todayISO(),
