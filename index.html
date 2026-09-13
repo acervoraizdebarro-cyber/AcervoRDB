@@ -800,7 +800,7 @@
     if(action === "reponer") reponerBook(id);
   });
 
-  function deleteBook(id){
+    async function deleteBook(id){
     const b = books.find(x=>x.id===id);
     if(!b) return;
     if(b.estado === "prestado"){
@@ -808,6 +808,12 @@
       return;
     }
     if(!confirm(`¿Eliminar "${b.titulo}" del catálogo? Esta acción no se puede deshacer.`)) return;
+    if(b.portadaUrl && usingSupabase){
+      try{
+        const path = decodeURIComponent(b.portadaUrl.split("/portadas/")[1] || "");
+        if(path) await supabaseClient.storage.from("portadas").remove([path]);
+      }catch(e){ /* si falla borrar la imagen, igual continuamos eliminando el libro */ }
+    }
     books = books.filter(x=>x.id!==id);
     saveBooks(); renderCatalog(); refreshStats();
     toast("Libro eliminado.");
